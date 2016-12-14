@@ -1,7 +1,14 @@
+# coding=utf8
 import csv
 import numpy as np
 import itertools
 import nltk
+import io
+
+
+def utf8_decoder(csv_data):
+    for line in csv_data:
+        yield line.decode('utf-8')
 
 def getSentenceData(path, vocabulary_size=8000):
     unknown_token = "UNKNOWN_TOKEN"
@@ -10,10 +17,15 @@ def getSentenceData(path, vocabulary_size=8000):
 
     # Read the data and append SENTENCE_START and SENTENCE_END tokens
     print("Reading CSV file...")
-    with open(path, 'r', encoding='utf-8') as f:
-        reader = csv.reader(f, skipinitialspace=True)
+    #with io.open(path, 'r', encoding='utf-8') as f:
+    with open(path, 'rb') as f:
+        #reader = csv.reader(f, skipinitialspace=True)
+        #data = f.read().decode('utf8').encode('utf8')
+        data = f.readlines()
+        reader = csv.reader(data, skipinitialspace=True)
         # Split full comments into sentences
-        sentences = itertools.chain(*[nltk.sent_tokenize(x[0].lower()) for x in reader])
+        #sentences = itertools.chain(*[nltk.sent_tokenize(x[0].lower()) for x in reader if x!=[]])
+        sentences = itertools.chain(*[nltk.sent_tokenize(x.decode('utf8').lower()) for x in data if x!=[]])
         # Append SENTENCE_START and SENTENCE_END
         sentences = ["%s %s %s" % (sentence_start_token, x, sentence_end_token) for x in sentences]
     print("Parsed %d sentences." % (len(sentences)))
