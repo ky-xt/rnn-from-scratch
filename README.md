@@ -220,14 +220,20 @@ def bptt(self, x, y):
 
 ### Another Way to Implement BPTT
 
-Let`s just focus on dL/dz. Suppose z is the input of the hidden layer and h is the output of the hidden layer.
-So we have dL/dh(t) = dL(t)/dh(t) + dL(t+1)/dz(t+1) * dz(t+1)/dh(t), as dh(t) will both influence the output of L(t)and the input of z(t+1). &alpha is good.
+Let`s just focus on dL/dz. Suppose z is the input of the hidden layer and h is the output of the hidden layer and a is the input of the next layer.
+So we have dL/dh(t) = dL/da(t) * da(t)/dh(t) + dL/dz(t+1) * dz(t+1)/dh(t), as dh(t) will both influence the output of L(t)and the input of z(t+1). 
+
+If we define `delta(t) = dL/dz(t)`, 
+   then `delta(t) = dh(t)/dz(t) * (dL/da(t) * da(t)/dh(t) + delta(t+1) * dz(t+1)/dh(t))`.
+
+So if we travel t by t = T .. 1, then there is only one loop instead of two, by which time cost is largely reduced.
+The implementation detail is in the `feature/bptt` branch.
 
 
 ### SGD Implementation
 Now that we are able to calculate the gradients for our parameters we can implement SGD. I like to do this in two steps:
 
-1. A function `sdg_step` that calculates the gradients and performs the updates for one batch.
+1. A function `sgd_step` that calculates the gradients and performs the updates for one batch.
 2. An outer loop that iterates through the training set and adjusts the learning rate.
 
 ```python
