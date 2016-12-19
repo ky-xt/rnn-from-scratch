@@ -220,9 +220,8 @@ def bptt(self, x, y):
 
 ### Another Way to Implement BPTT
 
-$N$  $x_i$
 Let`s just focus on dL/dz. Suppose z is the input of the hidden layer and h is the output of the hidden layer.
-So we have dL/dh(t) = dL(t)/dh(t) + dL(t+1)/dz(t+1) * dz(t+1)/dh(t), as dh(t) will both influence the output of L(t)and the input of z(t+1).
+So we have dL/dh(t) = dL(t)/dh(t) + dL(t+1)/dz(t+1) * dz(t+1)/dh(t), as dh(t) will both influence the output of L(t)and the input of z(t+1). &alpha is good.
 
 
 ### SGD Implementation
