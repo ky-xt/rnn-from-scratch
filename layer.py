@@ -1,5 +1,7 @@
 from activation import Tanh
 from gate import AddGate, MultiplyGate
+import numpy as np
+
 
 mulGate = MultiplyGate()
 addGate = AddGate()
@@ -23,3 +25,41 @@ class RNNLayer:
         dW, dprev_s = mulGate.backward(W, prev_s, dmulw)
         dU, dx = mulGate.backward(U, x, dmulu)
         return (dprev_s, dU, dW, dV)
+    
+    def backward1(self, x, prev_s, U, W, V, delta1, dmulv, forward=True):
+        if forward:
+            self.forward(x, prev_s, U, W, V)
+        dV, dsv = mulGate.backward(V, self.s, dmulv)
+        ds = dsv
+        '''
+        x (8000, )
+        dmulv (8000, )
+        add (100, )
+        U (100, 8000)
+        W (100, 100)
+        V (8000, 100)
+        delta (100, )
+        '''
+
+        m,  = self.add.shape
+        #print 'x',x.shape,'  dmulv', dmulv.shape, '   add', self.add.shape, '  V',V.shape, '  W',W.shape
+
+        dz = activation.backward(self.add, 1) 
+        #print 'dz shape', dz.shape
+        z1 = np.dot( np.asmatrix(dmulv), V ) # dL(t)/dh(t)
+        #print 'z1 shape', z1.shape
+        # h = W(m,n) dot z, so h(t+1) input is n, output is m;
+        # So dL/dz(t+1) is m, dz(t+1)/dh(t) is n;
+        # So dL(t+1)/dh = dL/dz(t+1) dot W
+        z2 = np.dot( np.asmatrix(delta1), W ) # dL(t+1)/dh(t)
+        #print 'z2 shape', z2.shape
+        dh = np.asarray(np.transpose(z1 + z2)).reshape((m, ))
+        #print 'dh shape', dh.shape
+        delta = activation.backward(self.add, dh)
+        #print 'delta shape', delta.shape
+        
+        dW = np.dot( np.asmatrix(delta).transpose(), np.asmatrix(prev_s) )
+        dU = np.dot( np.asmatrix(delta).transpose(), np.asmatrix(x) )
+        #delta =  dz * (V * dmulv + delta1 * W)
+     
+        return (delta, dU, dW, dV)

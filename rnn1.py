@@ -65,29 +65,18 @@ class Model:
         T = len(layers)
         prev_s_t = np.zeros(self.hidden_dim)
         diff_s = np.zeros(self.hidden_dim)
+        delta = np.zeros(self.hidden_dim)
         
         for k in range(0, T):
             t = T - k - 1
-            dmulv = output.diff(layers[t].mulv, y[t])
             input = np.zeros(self.word_dim)
             input[x[t]] = 1
-             
-
-
-        for t in range(0, T):
+            if t == 0:
+                prev_s_t = np.zeros(self.hidden_dim)
+            else:
+                prev_s_t = layers[t-1].s
             dmulv = output.diff(layers[t].mulv, y[t])
-            input = np.zeros(self.word_dim)
-            input[x[t]] = 1
-            dprev_s, dU_t, dW_t, dV_t = layers[t].backward(input, prev_s_t, self.U, self.W, self.V, diff_s, dmulv, False)
-            prev_s_t = layers[t].s
-            dmulv = np.zeros(self.word_dim)
-            for i in range(t-1, max(-1, t-self.bptt_truncate-1), -1):
-                input = np.zeros(self.word_dim)
-                input[x[i]] = 1
-                prev_s_i = np.zeros(self.hidden_dim) if i == 0 else layers[i-1].s
-                dprev_s, dU_i, dW_i, dV_i = layers[i].backward(input, prev_s_i, self.U, self.W, self.V, dprev_s, dmulv)
-                dU_t += dU_i
-                dW_t += dW_i
+            delta, dU_t, dW_t, dV_t = layers[t].backward1(input, prev_s_t, self.U, self.W, self.V, delta, dmulv) 
             dV += dV_t
             dU += dU_t
             dW += dW_t
@@ -117,4 +106,6 @@ class Model:
             for i in range(len(Y)):
                 self.sgd_step(X[i], Y[i], learning_rate)
                 num_examples_seen += 1
+                if i % 10 == 0:
+                    print self.U[:3, :3], '\n'
         return losses
