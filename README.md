@@ -229,6 +229,8 @@ If we define `delta(t) = dL/dz(t)`,
 So if we travel t by t = T .. 1, then there is only one loop instead of two, by which time cost is largely reduced.
 The implementation detail is in the `feature/bptt` branch.
 
+[formula derivation](http://mp.weixin.qq.com/s?__biz=MzIzODExMDE5MA==&mid=2694182661&idx=1&sn=ddfb3f301f5021571992824b21ddcafe&chksm=cc5f0384fb288a92877fbee9c6a1a03ba68e375b1552e762567d71d70105f67aacec7def8c40#rd)
+
 
 ### SGD Implementation
 Now that we are able to calculate the gradients for our parameters we can implement SGD. I like to do this in two steps:
