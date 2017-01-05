@@ -1,0 +1,140 @@
+from activation import Tanh, Sigmoid
+from gate import AddGate, MultiplyGate
+import numpy as np
+
+mulGate = MultiplyGate()
+
+sig = Sigmoid()
+tanh = Tanh()
+
+activation = tanh
+
+'''
+W relates to x(t),
+U relates to h(t-1),
+
+'''
+
+class RNNLayer(object):
+    def __init__(self, U, W, dim):
+        self.U = U
+        self.W = W
+        self.dim = dim
+        
+    # note: xlist is a list of input, such as a sentence.
+    def forward(self, xlist):
+        self.T = len(xlist)
+        self.layers = [] # rnn unit layer
+        self.slist = []
+        prev_s = np.zeros(self.dim)
+        for t in range(self.T):
+            layer = RNNUnitLayer()
+            x = xlist[t]
+            layer.forward(x, prev_s, self.U, self.W)
+            self.slist.append(layer.s)
+            prev_s = layer.s
+            self.layers.append(layer)
+    
+    def bptt(self, dslist):
+        T = self.T
+        dU = np.zeros(self.U.shape)
+        dW = np.zeros(self.W.shape)
+        delta = np.zeros(self.dim) # delta is dL / dz(t)
+        
+        dxlist = []
+        for k in range(0, T):
+            t = T - k - 1
+            if t == 0:
+                prev_s = np.zeros(self.dim)
+            else:
+                prev_s = self.layers[t-1].s
+            
+            ds = dslist[t]
+            delta, dU_t, dW_t, dx_t = self.layers[t].backward(prev_s, self.U, self.W, delta, ds)
+            dU += dU_t
+            dW += dW_t
+            dxlist.append(dx_t)
+
+        #print 'xxxxxxx', 'dim =',self.dim, 'dx shape', dx_t.shape 
+        return (dxlist, dU, dW)
+
+    def update(self, dU, dW, rate):
+        self.U -= rate * dU
+        self.W -= rate * dW
+
+class RNNUnitLayer:
+    def forward(self, x, prev_s, U, W):
+        self.x = x
+        self.mulu = mulGate.forward(U, x) 
+        self.mulw = mulGate.forward(W, prev_s)
+        self.add = self.mulu + self.mulw
+        self.s = activation.forward(self.add)
+
+    # delta1 is from t+1
+    def backward(self, prev_s, U, W, delta1, ds):
+        m,  = self.add.shape
+        x = self.x
+        #dz = activation.backward(self.add, 1)
+        z1 = ds  # dL(t)/dh(t)
+        z2 = np.dot( np.asmatrix(delta1), W ) # dL(t+1)/dh(t)
+        dh = np.asarray(np.transpose(z1 + z2)).reshape((m, ))
+        delta = activation.backward(self.add, dh)
+
+        dW = np.dot( np.asmatrix(delta).transpose(), np.asmatrix(prev_s) )
+        dU = np.dot( np.asmatrix(delta).transpose(), np.asmatrix(x) )
+        dx = np.asarray( np.dot( np.asmatrix(delta), U) ).reshape(x.shape)
+
+        return (delta, dU, dW, dx)
+
+
+class Softmax:
+    def fn(self, z): # z is np.array
+        e = np.exp(z)
+        s = np.sum(e)
+        return e/s
+    
+    def delta(self, z, y):
+        s = self.fn(z)
+        s[y] -= 1.0
+        return s
+
+    def loss(self, s, y):
+        return -np.log(s[y])
+
+
+class OutputLayer:
+    def __init__(self, V):
+        self.V = V
+        self.output = Softmax()
+
+    def loss(self, s, y):
+        return self.output.loss(s, y)
+
+    def forward(self, xlist): # x is input
+        self.xlist = xlist
+        self.zlist = []
+        self.slist = []
+        for x in xlist:
+            z = mulGate.forward(self.V, x)
+            s = self.output.fn(z)
+            self.zlist.append(z)
+            self.slist.append(s)
+        return self.slist
+
+    def backward(self, ylist):
+        dxlist = []
+        dV = np.zeros(self.V.shape)
+        for t in range(len(ylist)):
+            z = self.zlist[t]
+            y = ylist[t]
+            x = self.xlist[t]
+            delta = self.output.delta(z, y)
+            dV_t, dx = mulGate.backward(self.V, x, delta)
+            dxlist.append(dx)
+            dV += dV_t
+        return (dV, dxlist)
+
+    def update(self, dV, rate):
+        self.V -= rate * dV
+
+
