@@ -44,9 +44,8 @@ class RNNLayer:
         m,  = self.add.shape
         #print 'x',x.shape,'  dmulv', dmulv.shape, '   add', self.add.shape, '  V',V.shape, '  W',W.shape
 
-        dz = activation.backward(self.add, 1) 
-        #print 'dz shape', dz.shape
-        z1 = np.dot( np.asmatrix(dmulv), V ) # dL(t)/dh(t)
+        #z1 = np.dot( np.asmatrix(dmulv), V ) # dL(t)/dh(t)
+        z1 = dsv
         #print 'z1 shape', z1.shape
         # h = W(m,n) dot z, so h(t+1) input is n, output is m;
         # So dL/dz(t+1) is m, dz(t+1)/dh(t) is n;
@@ -60,6 +59,7 @@ class RNNLayer:
         
         dW = np.dot( np.asmatrix(delta).transpose(), np.asmatrix(prev_s) )
         dU = np.dot( np.asmatrix(delta).transpose(), np.asmatrix(x) )
-        #delta =  dz * (V * dmulv + delta1 * W)
-     
+
+        dx = np.asarray( np.dot( np.asmatrix(delta), U) ).reshape(x.shape)
+
         return (delta, dU, dW, dV)
