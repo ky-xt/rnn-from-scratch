@@ -16,9 +16,10 @@ U relates to h(t-1),
 '''
 
 class RNNLayer(object):
-    def __init__(self, U, W, dim):
+    def __init__(self, U, W, B, dim):
         self.U = U
         self.W = W
+        self.B = B
         self.dim = dim
         
     # note: xlist is a list of input, such as a sentence.
@@ -30,7 +31,7 @@ class RNNLayer(object):
         for t in range(self.T):
             layer = RNNUnitLayer()
             x = xlist[t]
-            layer.forward(x, prev_s, self.U, self.W)
+            layer.forward(x, prev_s, self.U, self.W, self.B)
             self.slist.append(layer.s)
             prev_s = layer.s
             self.layers.append(layer)
@@ -39,6 +40,7 @@ class RNNLayer(object):
         T = self.T
         dU = np.zeros(self.U.shape)
         dW = np.zeros(self.W.shape)
+        dB = np.zeros(self.B.shape)
         delta = np.zeros(self.dim) # delta is dL / dz(t)
         
         dxlist = []
@@ -50,24 +52,26 @@ class RNNLayer(object):
                 prev_s = self.layers[t-1].s
             
             ds = dslist[t]
-            delta, dU_t, dW_t, dx_t = self.layers[t].backward(prev_s, self.U, self.W, delta, ds)
+            delta, dU_t, dW_t, dB_t, dx_t = self.layers[t].backward(prev_s, self.U, self.W, delta, ds)
             dU += dU_t
             dW += dW_t
+            dB += dB_t
             dxlist.append(dx_t)
 
         #print 'xxxxxxx', 'dim =',self.dim, 'dx shape', dx_t.shape 
-        return (dxlist, dU, dW)
+        return (dxlist, dU, dW, dB)
 
-    def update(self, dU, dW, rate):
+    def update(self, dU, dW, dB, rate):
         self.U -= rate * dU
         self.W -= rate * dW
+        self.B -= rate * dB
 
 class RNNUnitLayer:
-    def forward(self, x, prev_s, U, W):
+    def forward(self, x, prev_s, U, W, B):
         self.x = x
-        self.mulu = mulGate.forward(U, x) 
-        self.mulw = mulGate.forward(W, prev_s)
-        self.add = self.mulu + self.mulw
+        mulu = mulGate.forward(U, x) 
+        mulw = mulGate.forward(W, prev_s)
+        self.add = mulu + mulw + B
         self.s = activation.forward(self.add)
 
     # delta1 is from t+1
@@ -82,9 +86,10 @@ class RNNUnitLayer:
 
         dW = np.dot( np.asmatrix(delta).transpose(), np.asmatrix(prev_s) )
         dU = np.dot( np.asmatrix(delta).transpose(), np.asmatrix(x) )
+        dB = delta
         dx = np.asarray( np.dot( np.asmatrix(delta), U) ).reshape(x.shape)
 
-        return (delta, dU, dW, dx)
+        return (delta, dU, dW, dB, dx)
 
 
 class Softmax:

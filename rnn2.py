@@ -19,7 +19,8 @@ class Model:
         for hdim in self.layer_size:
             U = np.random.uniform(-np.sqrt(1. / d1), np.sqrt(1. / d1), (hdim, d1))
             W = np.random.uniform(-np.sqrt(1. / hdim), np.sqrt(1. / hdim), (hdim, hdim))
-            layer = RNNLayer(U, W, hdim) 
+            B = np.random.uniform(-np.sqrt(1. / hdim), np.sqrt(1. / hdim), (hdim, ))
+            layer = RNNLayer(U, W, B, hdim) 
             d1 = hdim
             self.layers.append(layer)
 
@@ -72,8 +73,8 @@ class Model:
         for k in range(0, T):
             t = T - k - 1
             layer = self.layers[t]
-            dslist, dU, dW = layer.bptt(dslist)
-            layer.update(dU, dW, learning_rate)
+            dslist, dU, dW, dB = layer.bptt(dslist)
+            layer.update(dU, dW, dB, learning_rate)
         
     def sgd_step(self, x, y, learning_rate):
         self.bptt(x, y, learning_rate)
@@ -96,6 +97,6 @@ class Model:
             for i in range(len(Y)):
                 self.sgd_step(X[i], Y[i], learning_rate)
                 num_examples_seen += 1
-                if i % 10 == 0:
+                if i % 20 == 0:
                     print self.layers[0].U[:3, :3], '\n'
         return losses

@@ -106,6 +106,6 @@ class Model:
             for i in range(len(Y)):
                 self.sgd_step(X[i], Y[i], learning_rate)
                 num_examples_seen += 1
-                if i % 10 == 0:
+                if i % 20 == 0:
                     print self.U[:3, :3], '\n'
         return losses
