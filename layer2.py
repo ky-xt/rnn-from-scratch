@@ -10,8 +10,9 @@ tanh = Tanh()
 activation = tanh
 
 '''
-W relates to x(t),
-U relates to h(t-1),
+For hidden layer cell: 
+    - input z(t) = W·x(t) + U·s(t-1) + B
+    - output s(t) = activation(z(t))
 
 '''
 
@@ -58,7 +59,6 @@ class RNNLayer(object):
             dB += dB_t
             dxlist.append(dx_t)
 
-        #print 'xxxxxxx', 'dim =',self.dim, 'dx shape', dx_t.shape 
         return (dxlist, dU, dW, dB)
 
     def update(self, dU, dW, dB, rate):
@@ -74,7 +74,7 @@ class RNNUnitLayer:
         self.add = mulu + mulw + B
         self.s = activation.forward(self.add)
 
-    # delta1 is from t+1
+    # delta1 is from t+1 and refers to dL / dz(t+1)
     def backward(self, prev_s, U, W, delta1, ds):
         m,  = self.add.shape
         x = self.x
