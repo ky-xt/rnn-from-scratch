@@ -25,4 +25,15 @@ class RNNLayer(object):
 
 ```
 
+New commitment:
+- Implement LSTM network without peepholes.
+- LSTM cell Includes an InputGate, an OutputGate, a ForgetGate.
+
+The source code is in *rnnlm3.py*, *rnn3.py*, *layer3.py*.
+The bptt algorithm of lstm is quite complicated, so it really takes time to get it through.
+
+![](figures/lstm1.png)
+![](figures/lstm2.png)
+![](figures/lstm3.png)
+
 
