@@ -33,10 +33,10 @@ The source code is in *rnnlm3.py*, *rnn3.py*, *layer3.py*.
 The bptt algorithm of lstm is quite complicated, so it really takes time to get it through.
 
 ### LSTM BPTT
-- a indicates cell or gate input;
-- b indicates cell or gate output;
-- Sc indicates cell status;
-- function f, g, h indicates activation functions.
+- *a* indicates cell or gate input;
+- *b* indicates cell or gate output;
+- *Sc* indicates cell status;
+- function *f*, *g*, *h* indicates activation functions.
 
 #### Forward
 ![](figures/lstm1.png)
@@ -46,6 +46,7 @@ The bptt algorithm of lstm is quite complicated, so it really takes time to get 
 Output delta comes from two parts:
 - delta from next layer at time t;
 - delta from this layer at time t+1;
+
 ![](figures/lstm2.png)
 
 Status delta comes from several parts:
@@ -54,6 +55,7 @@ Status delta comes from several parts:
 - delta from input gate at time t+1;
 - delta from forget gate at time t+1;
 - delta from output gate at time t;
+
 ![](figures/lstm3.png)
 
 Note1: Only keep the first 2 terms if no peephole used!
