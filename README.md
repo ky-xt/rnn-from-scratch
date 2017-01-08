@@ -1,5 +1,6 @@
 # Implementing Recurrent Neural Network from Scratch
 
+## RNN
 This branch is written by Lanpay and implement a new structure to process RNNs.
 
 The source code is in *rnnlm2.py*, *rnn2.py*, *layer2.py*.
@@ -7,6 +8,7 @@ The source code is in *rnnlm2.py*, *rnn2.py*, *layer2.py*.
 This implementation has serveral modifications as follows:
 - Implement a new RNN layer which holds its own params like U, W and layers through time.
 - Implement a new RNN unit layer which can calculate forward and backward.
+- Implement the bptt algorithm with only one loop through time T.
 - Implement a new Output layer.
 - Using this implementation, we can define multipile rnn hidden layers.
 
