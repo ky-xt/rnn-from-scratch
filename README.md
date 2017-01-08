@@ -27,7 +27,7 @@ class RNNLayer(object):
 
 ```
 
-## New commitment
+## LSTM
 - Implement LSTM network without peepholes.
 - LSTM cell Includes an InputGate, an OutputGate, a ForgetGate.
 
