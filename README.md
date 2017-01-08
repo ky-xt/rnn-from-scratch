@@ -44,8 +44,8 @@ The bptt algorithm of lstm is quite complicated, so it really takes time to get 
 #### Backward
 
 Output delta comes from two parts:
-- delta from next layer at time t;
-- delta from this layer at time t+1;
+- delta from next layer at time t #dx(t);
+- delta from this layer at time t+1 #dh(t+1);
 
 ![](figures/lstm2.png)
 
