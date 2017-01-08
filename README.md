@@ -59,5 +59,6 @@ Status delta comes from several parts:
 ![](figures/lstm3.png)
 
 Note1: Only keep the first 2 terms if no peephole used!
+
 Note2: The above formulars are using multiple-function, not dot-function!
 Finally, when we have delta of these gates and cell, we can calculate delta of x(t) and h(t-1).
