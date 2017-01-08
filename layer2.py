@@ -1,3 +1,17 @@
+#encoding=utf8
+"""
+filename:
+    - layer2.py
+
+date:
+    - 2017.01.04
+
+description:
+    - Implement a rnn layer to handle hidden rnn layer.
+    - Implement bptt inside this rnn layer.
+"""
+
+
 from activation import Tanh, Sigmoid
 from gate import AddGate, MultiplyGate
 import numpy as np
@@ -72,7 +86,7 @@ class RNNUnitLayer:
         mulu = mulGate.forward(U, x) 
         mulw = mulGate.forward(W, prev_s)
         self.add = mulu + mulw + B
-        self.s = activation.forward(self.add)
+        self.s = activation.forward(self.add) # s is the output. Also use h.
 
     # delta1 is from t+1 and refers to dL / dz(t+1)
     def backward(self, prev_s, U, W, delta1, ds):
